@@ -127,10 +127,3 @@ When creating Issues or Pull Requests, please use the provided templates to ensu
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 ```
 
----
-Модуль `bignum_sub_u64` выглядит полностью завершенным: у нас есть заголовочный файл, экстремально быстрая ASM-реализация, полный набор тестов, бенчмарки и документация. 
-
-Что бы вы хотели сделать дальше?
-1. Настроить GitHub Actions CI (файл `.github/workflows/ci.yml`), если он отличается от стандартного.
-2. Перейти к разработке следующего модуля (например, `bignum_add_u64` или `bignum_mul_u64`).
-3. Интегрировать этот модуль в основной проект `bignum-lib`.
