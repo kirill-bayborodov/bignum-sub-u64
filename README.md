@@ -1,22 +1,19 @@
-# bignum-template
+# bignum-sub-u64
 
-[![C/ASM CI](https://github.com/kirill-bayborodov/bignum-template/actions/workflows/ci.yml/badge.svg)](https://github.com/kirill-bayborodov/bignum-template/actions/workflows/ci.yml)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/kirill-bayborodov/bignum-template?label=release)](https://github.com/kirill-bayborodov/bignum-template/releases/latest)
+[![C/ASM CI](https://github.com/kirill-bayborodov/bignum-sub-u64/actions/workflows/ci.yml/badge.svg)](https://github.com/kirill-bayborodov/bignum-sub-u64/actions/workflows/ci.yml)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/kirill-bayborodov/bignum-sub-u64?label=release)](https://github.com/kirill-bayborodov/bignum-sub-u64/releases/latest)
 
-
-
-`bignum-template` is a high-performance, standalone module for performing a logical template on an arbitrary-precision integer (`bignum_t`).
-A highly optimized x86-64 assembly implementation of a bignum template operation, designed for performance-critical applications. 
+`bignum-sub-u64` is a high-performance, standalone module for subtracting a 64-bit unsigned integer (`uint64_t`) from an arbitrary-precision integer (`bignum_t`).
+A highly optimized x86-64 assembly implementation of a bignum subtraction operation, designed for performance-critical applications.
 
 ## Distribution
 
-Part of the `bignum-lib` project: https://github.com/kirill-bayborodov/bignum-lib  
+Part of the `bignum-lib` project: https://github.com/kirill-bayborodov/bignum-lib
 Also available as a standalone distribution.
 
 ## Features
 
--   **High Performance:** Hand-crafted x86-64 yasm assembly — an ultra-optimized, multithreading-ready engine delivering peak execution speed..
--   **Dependency-Free Core:** The core logic has no external runtime dependencies.
+-   **High Performance:** Hand-crafted x86-64 yasm assembly — an ultra-optimized, multithreading-ready engine delivering peak execution speed.
 -   **Tests and Benchmarks:** Provides a comprehensive test suite and performance microbenchmarks.
 -   **Automated Builds:** A comprehensive `Makefile` for easy compilation, testing, and benchmarking.
 -   **Continuous Integration:** All changes are automatically built and tested via GitHub Actions.
@@ -29,18 +26,20 @@ Also available as a standalone distribution.
 
 To clone the repository with its submodule, use:
 ```bash
-git clone --recurse-submodules https://github.com/kirill-bayborodov/bignum-template.git
+git clone --recurse-submodules https://github.com/kirill-bayborodov/bignum-sub-u64.git
 ```
+
 ## API
 
-The library provides a single function, declared in `include/bignum_template.h`.
+The library provides a single function, declared in `include/bignum_sub_u64.h`.
 
 ```c
-bignum_status_t bignum_template(bignum_t* num, size_t template );
+bignum_sub_u64_status_t bignum_sub_u64(bignum_t *result, const bignum_t *a, const uint64_t b);
 ```
--   **`num`**: A pointer to the `bignum_t` structure to be shifted.
--   **`template`**: The number of bits to template.
--   **Returns**: A `bignum_status_t` enum (`BIGNUM_SUCCESS`, `BIGNUM_ERROR_NULL_ARG`, `BIGNUM_ERROR_OVERFLOW`).
+-   **`result`**: A pointer to the `bignum_t` structure to store the operation result.
+-   **`a`**: A pointer to the `bignum_t` structure representing the minuend.
+-   **`b`**: A 64-bit unsigned integer (`uint64_t`) representing the subtrahend.
+-   **Returns**: A `bignum_sub_u64_status_t` enum (`BIGNUM_SUB_U64_OK`, `BIGNUM_SUB_U64_ERR_NULL_PTR`, `BIGNUM_SUB_U64_ERR_NEGATIVE_RESULT`, `BIGNUM_SUB_U64_ERR_BUFFER_OVERLAP`, `BIGNUM_SUB_U64_ERR_BAD_LENGTH`).
 
 ## How to Build, Test, Install and Use
 
@@ -71,7 +70,7 @@ make bench CONFIG=debug
 ```
 
 ### Build the distributive
-Builds the installation pack of files (with objects .o file) in dist direstory.
+Builds the installation pack of files (with objects .o file) in dist directory.
 ```bash
 make install CONFIG=release
 ```
@@ -84,32 +83,32 @@ make dist CONFIG=release
 
 ## Clean Up
 
-To remove all generated files (object files, executables, reports ):
+To remove all generated files (object files, executables, reports):
 ```bash
 make clean
 ```
 
 ## How to Use
 
-This project produces an object file (`bignum_template.o`) which you can link with your own application.
+This project produces an object file (`bignum_sub_u64.o`) which you can link with your own application.
 
 **1. Clone the repository with submodules:**
 ```bash
-git clone --recurse-submodules https://github.com/kirill-bayborodov/bignum-template.git
-cd bignum-template
+git clone --recurse-submodules https://github.com/kirill-bayborodov/bignum-sub-u64.git
+cd bignum-sub-u64
 ```
 
 **2. Build the object file:**
 ```bash
 make build
 ```
-The output will be located at `build/bignum_template.o`.
+The output will be located at `build/bignum_sub_u64.o`.
 
 **3. Link with your application:**
 When compiling your project, include the object file and specify the include paths for the headers.
 ```bash
-gcc your_app.c build/bignum_template.o -I./include -I./libs/bignum-common/include -o your_app -no-pie
-```	
+gcc your_app.c build/bignum_sub_u64.o -I./include -I./libs/bignum-common/include -o your_app -no-pie
+```
 
 ## Contributing
 
@@ -126,3 +125,12 @@ When creating Issues or Pull Requests, please use the provided templates to ensu
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+```
+
+---
+Модуль `bignum_sub_u64` выглядит полностью завершенным: у нас есть заголовочный файл, экстремально быстрая ASM-реализация, полный набор тестов, бенчмарки и документация. 
+
+Что бы вы хотели сделать дальше?
+1. Настроить GitHub Actions CI (файл `.github/workflows/ci.yml`), если он отличается от стандартного.
+2. Перейти к разработке следующего модуля (например, `bignum_add_u64` или `bignum_mul_u64`).
+3. Интегрировать этот модуль в основной проект `bignum-lib`.
