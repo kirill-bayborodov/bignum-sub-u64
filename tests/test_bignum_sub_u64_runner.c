@@ -15,11 +15,11 @@ int main() {
     bignum_t res = {.words = {0}, .len = 0};
     bignum_t a = {.words = {12345}, .len = 1};
     uint64_t b = 10000;
-    
+
     bignum_sub_u64_status_t status = bignum_sub_u64(&res, &a, b);
     assert(status == BIGNUM_SUB_U64_OK);
     assert(res.len == 1 && res.words[0] == 2345);
-    
+
     printf("PASSED\n");
     return 0;
 }

@@ -12,7 +12,6 @@
 ;   - Branchless Overlap Check (проверка перекрытия без ветвлений)
 ;   - CF Preservation (сохранение флага переноса через lea/dec)
 ;   - Early Exit (мгновенное копирование остатка через SSE, если borrow = 0)
-;   - Lazy Zeroing (быстрое обнуление хвоста через pxor/movdqu)
 ; -----------------------------------------------------------------------------
 
 section .text
@@ -70,7 +69,7 @@ bignum_sub_u64:
     jnz     .b_not_zero
     cmp     rdi, rsi
     je      .success        ; Если in-place и b==0, ничего делать не нужно
-    
+
     ; Копируем a в result
     mov     rcx, r8
     mov     r14, rsi
@@ -90,13 +89,13 @@ bignum_sub_u64:
     jb      .err_negative   ; a < b
     sub     rax, rdx
     mov     [rdi], rax
-    
+
     ; Устанавливаем длину (0 если rax == 0, иначе 1)
     test    rax, rax
     setnz   cl
     movzx   rcx, cl
     mov     qword [rdi + BIGNUM_OFFSET_LEN], rcx
-    jmp     .zero_rest      ; Обнуляем остаток буфера
+    jmp     .normalize      ; Хвост не является частью значения
 
 .generic_sub:
     ; 7. Основной цикл вычитания (a->len > 1)
@@ -115,11 +114,11 @@ bignum_sub_u64:
     ; Аппаратная магия x86: инструкции JNC, LEA и DEC НЕ ПОРТЯТ флаг CF!
     ; Поэтому мы можем передавать borrow между итерациями без setc/shr.
     jnc     .fast_copy      ; Если заёма (borrow) больше нет, мгновенно копируем остаток
-    
+
     mov     rax, [r14]
     sbb     rax, 0          ; Вычитаем borrow
     mov     [r15], rax
-    
+
     lea     r14, [r14 + 8]
     lea     r15, [r15 + 8]
     dec     rcx
@@ -154,31 +153,7 @@ bignum_sub_u64:
 .sub_done:
     mov     qword [rdi + BIGNUM_OFFSET_LEN], r8
 
-    ; 9. Lazy Zeroing (обнуление неиспользуемого хвоста)
-.zero_rest:
-    mov     rcx, BIGNUM_CAPACITY
-    sub     rcx, r8
-    jz      .normalize
-
-    lea     r15, [rdi + r8*8]
-    pxor    xmm0, xmm0
-    mov     rax, rcx
-    shr     rax, 1          ; rax = количество 16-байтных блоков
-    jz      .zero_odd
-
-    align 16
-.zero_sse_loop:
-    movdqu  [r15], xmm0
-    lea     r15, [r15 + 16]
-    dec     rax
-    jnz     .zero_sse_loop
-
-.zero_odd:
-    test    rcx, 1
-    jz      .normalize
-    mov     qword [r15], 0
-
-    ; 10. Нормализация результата (удаление ведущих нулей)
+    ; 9. Нормализация результата (удаление ведущих нулей)
 .normalize:
     mov     rcx, qword [rdi + BIGNUM_OFFSET_LEN]
     test    rcx, rcx

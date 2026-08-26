@@ -90,7 +90,7 @@ int test_fuzzing_robustness(void) {
         for (size_t j = 0; j < a.len; ++j) {
             a.words[j] = ((uint64_t)rand() << 32) | rand();
         }
-        
+
         // Убедимся, что старшее слово не 0 (нормализация)
         if (a.words[a.len - 1] == 0) {
             a.words[a.len - 1] = 1;

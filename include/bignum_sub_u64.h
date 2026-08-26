@@ -1,32 +1,21 @@
 /**
- * @file    bignum_sub_u64.h
- * @author  git@bayborodov.com
+ * @file bignum_sub_u64.h
+ * @brief Public API for subtracting one unsigned 64-bit word from a bignum.
+ * @details The module exposes one operation over caller-owned bignum records. The
+ *          result is written only after all validation and negative-result checks
+ *          succeed; error returns therefore preserve the destination byte-for-byte.
+ *          The operation is reentrant and uses no mutable global state.
  * @version 1.0.0
- * @date    29.07.2026
- *
- * @brief   Публичный заголовочный файл для модуля вычитания 64-битного числа из большого числа.
- *
- * @details
- *   Определяет API для функции bignum_sub_u64, включая типы данных,
- *   коды состояния и прототипы функций.
- *
- * @see     bignum.h
- * @since   1.0.0
- *
- * @history
- *   - rev. 0 (29.07.2026): Первоначальное создание API по аналогии с bignum_div_u64.
+ * @since 1.0.0
  */
-
 #ifndef BIGNUM_SUB_U64_H
 #define BIGNUM_SUB_U64_H
 
 #include <bignum.h>
-#include <stddef.h>
 #include <stdint.h>
 
-// Проверка на наличие определения BIGNUM_CAPACITY из общего заголовка
 #ifndef BIGNUM_CAPACITY
-#  error "bignum.h must define BIGNUM_CAPACITY"
+#error "bignum.h must define BIGNUM_CAPACITY"
 #endif
 
 #ifdef __cplusplus
@@ -34,44 +23,43 @@ extern "C" {
 #endif
 
 /**
- * @brief Коды состояния для функции bignum_sub_u64.
+ * @brief Reports the outcome of bignum_sub_u64.
+ * @details A success status guarantees that result contains the normalized
+ *          difference. Every error status guarantees that the caller-owned
+ *          destination is unchanged and may be retried after correcting inputs.
  */
-typedef enum {
-    BIGNUM_SUB_U64_OK                    =  0,
-    BIGNUM_SUB_U64_ERR_NULL_PTR          = -1,
-    BIGNUM_SUB_U64_ERR_NEGATIVE_RESULT   = -2, /**< Результат отрицательный (a < b). */
-    BIGNUM_SUB_U64_ERR_BUFFER_OVERLAP    = -3, /**< Обнаружено перекрытие буферов result и a. */
-    BIGNUM_SUB_U64_ERR_BAD_LENGTH        = -4  /**< Ошибка: длина входного числа a->len превышает BIGNUM_CAPACITY. */
+typedef enum bignum_sub_u64_status {
+    BIGNUM_SUB_U64_OK = 0, /**< Difference stored; result is normalized and valid. */
+    BIGNUM_SUB_U64_ERR_NULL_PTR = -1, /**< result or a is NULL; result is unchanged. */
+    BIGNUM_SUB_U64_ERR_NEGATIVE_RESULT = -2, /**< a is smaller than b; result is unchanged. */
+    BIGNUM_SUB_U64_ERR_BUFFER_OVERLAP = -3, /**< Distinct records overlap; result is unchanged. */
+    BIGNUM_SUB_U64_ERR_BAD_LENGTH = -4 /**< a->len exceeds BIGNUM_CAPACITY; result is unchanged. */
 } bignum_sub_u64_status_t;
 
 /**
- * @brief Выполняет вычитание 64-битного числа из большого беззнакового целого числа.
- *
- * @details
- *   ### Алгоритм
- *   1.  **Валидация:** Проверяются входные указатели `result` и `a` на `NULL`,
- *       а также буферы `result` и `a` на недопустимое перекрытие.
- *   2.  **Проверка длины:** Проверяется, что `a->len` не превышает `BIGNUM_CAPACITY`.
- *   3.  **Проверка знака:** Если `a` равно 0 (т.е. `a->len == 0`), а `b > 0`, 
- *       возвращается ошибка `BIGNUM_SUB_U64_ERR_NEGATIVE_RESULT`.
- *   4.  **Вычитание:** Выполняется вычитание `b` из младшего слова `a` с 
- *       распространением заимствования (borrow) на старшие слова при необходимости.
- *   5.  **Нормализация:** Длина результата `result->len` устанавливается корректно,
- *       удаляя ведущие нули, если старшие слова обнулились.
- *
- * @param[out] result Указатель на структуру `bignum_t` для записи разности.
- * @param[in]  a      Указатель на `bignum_t`, представляющую уменьшаемое.
- * @param[in]  b      64-битное вычитаемое.
- *
- * @return bignum_sub_u64_status_t Код состояния операции.
- * @retval BIGNUM_SUB_U64_OK                    Успешное выполнение.
- * @retval BIGNUM_SUB_U64_ERR_NULL_PTR          Один из входных указателей `NULL`.
- * @retval BIGNUM_SUB_U64_ERR_NEGATIVE_RESULT   Результат отрицательный (`a < b`).
- * @retval BIGNUM_SUB_U64_ERR_BUFFER_OVERLAP    Обнаружено перекрытие буферов `result` и `a`.
- * @retval BIGNUM_SUB_U64_ERR_BAD_LENGTH        Длина `a->len` превышает `BIGNUM_CAPACITY`.
+ * @brief Subtracts one uint64_t value from a non-negative bignum.
+ * @details Validation checks NULL pointers, the input length and forbidden
+ *          partial overlap before reading or writing the destination. In-place
+ *          operation (`result == a`) is allowed. A one-word input uses a direct
+ *          comparison/subtraction; a multi-word input subtracts from the low
+ *          word and propagates borrow through higher words, then removes leading
+ *          zero words from the reported length. The unused physical tail is not
+ *          part of the bignum value and is not required to be modified.
+ * @param[out] result Caller-allocated destination record; caller retains ownership.
+ *                    It may alias `a` exactly, but may not partially overlap `a`.
+ * @param[in] a Caller-owned immutable input record with `0 <= a->len <= BIGNUM_CAPACITY`.
+ * @param[in] b Unsigned 64-bit subtrahend; no ownership or lifetime transfer occurs.
+ * @return A named bignum_sub_u64_status_t value. On BIGNUM_SUB_U64_OK, result is
+ *         normalized and contains `a - b`; on every error, result is unchanged.
+ * @pre result and a are valid bignum_t objects unless NULL is intentionally being tested.
+ * @pre If result and a are distinct, their complete records do not partially overlap.
+ * @post Success sets result->len to the normalized word count and writes all value words.
+ * @warning The mathematical result must be non-negative; underflow is reported rather
+ *          than represented with a sign. The function does not allocate memory.
+ * @thread_safety Safe for concurrent calls when each call uses independent records.
+ * @complexity O(a->len) time in the worst case and O(1) auxiliary space.
  */
-bignum_sub_u64_status_t bignum_sub_u64(bignum_t *result, const bignum_t *a, const uint64_t b);
-
+bignum_sub_u64_status_t bignum_sub_u64(bignum_t *result, const bignum_t *a, uint64_t b);
 
 #ifdef __cplusplus
 }

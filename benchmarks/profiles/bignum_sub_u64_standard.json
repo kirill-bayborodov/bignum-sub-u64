@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "description": "Standard deterministic matrix for bignum_sub_u64 subtraction paths.",
+  "profiles": [
+    {
+      "id": "zero-zero-tiny-end-to-end",
+      "input_kind": "zero",
+      "operation_kind": "zero",
+      "measure_mode": "end-to-end",
+      "size_profile": "tiny",
+      "capacity_profile": "normal"
+    },
+    {
+      "id": "nonzero-one-tiny-kernel",
+      "input_kind": "nonzero",
+      "operation_kind": "one",
+      "measure_mode": "kernel-only",
+      "size_profile": "tiny",
+      "capacity_profile": "normal"
+    },
+    {
+      "id": "nonzero-zero-small-end-to-end",
+      "input_kind": "nonzero",
+      "operation_kind": "zero",
+      "measure_mode": "end-to-end",
+      "size_profile": "small",
+      "capacity_profile": "normal"
+    },
+    {
+      "id": "nonzero-borrow-medium-kernel",
+      "input_kind": "nonzero",
+      "operation_kind": "borrow",
+      "measure_mode": "kernel-only",
+      "size_profile": "medium",
+      "capacity_profile": "normal"
+    },
+    {
+      "id": "nonzero-max-large-end-to-end",
+      "input_kind": "nonzero",
+      "operation_kind": "max",
+      "measure_mode": "end-to-end",
+      "size_profile": "large",
+      "capacity_profile": "normal"
+    },
+    {
+      "id": "mixed-default-variable-kernel",
+      "input_kind": "mixed",
+      "operation_kind": "default",
+      "measure_mode": "kernel-only",
+      "size_profile": "variable",
+      "capacity_profile": "normal"
+    },
+    {
+      "id": "nonzero-borrow-near-capacity-kernel",
+      "input_kind": "nonzero",
+      "operation_kind": "borrow",
+      "measure_mode": "kernel-only",
+      "size_profile": "large",
+      "capacity_profile": "near-capacity"
+    },
+    {
+      "id": "nonzero-zero-near-capacity-end-to-end",
+      "input_kind": "nonzero",
+      "operation_kind": "zero",
+      "measure_mode": "end-to-end",
+      "size_profile": "large",
+      "capacity_profile": "near-capacity"
+    }
+  ]
+}
