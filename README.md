@@ -21,7 +21,7 @@ The operation accepts `result == a` as the in-place form. Distinct records may n
 
 ## Dependencies
 
-The build requires GNU Make, GCC, YASM and the standard POSIX pthread environment. Static analysis uses `cppcheck` when available. The `bignum-common` submodule supplies `bignum_t` and `BIGNUM_CAPACITY`; initialize it with `git submodule update --init --recursive`.
+The build requires GNU Make, GCC, YASM and the standard POSIX pthread environment. Static analysis uses `cppcheck` when available. The `bignum-core` submodule supplies `bignum_t` and `BIGNUM_CAPACITY`; initialize it with `git submodule update --init --recursive`.
 
 The reproducible benchmark workflow uses the v1.0.0 distribution of [`benchmark-framework`](https://github.com/kirill-bayborodov/benchmark-framework). Its compatibility bundle is installed under `libs/benchmark-framework/dist` and provides the `benchmark_framework.h` adapter API, `libbenchmark_framework.a`, matrix tools and JSON profiles.
 
@@ -57,14 +57,14 @@ make test_sanitize SAN=undefined CONFIG=debug USE_ASM=no
 
 ## C11 coverage
 
-The reference translation unit is instrumented with GCC gcov flags and executed by the deterministic, randomized and MT test artifacts. The reviewed run reached 100.00% line coverage (40/40), 100.00% branch coverage (32/32) and 100.00% call coverage (1/1). The suite includes NULL, invalid length, partial overlap, zero input, zero subtrahend, one-word underflow, exact zero, maximum word, borrow propagation and transactional preservation scenarios.
+The reference translation unit is instrumented with GCC gcov flags and executed by the deterministic, randomized and MT test artifacts. The reviewed run reached 100.00% line coverage (39/39), 100.00% branch coverage (36/36) and 100.00% call coverage (1/1). The suite includes NULL, invalid length, partial overlap, zero input, zero subtrahend, one-word underflow, exact zero, maximum word, borrow propagation and transactional preservation scenarios.
 
 A reproducible manual coverage command is:
 
 ```bash
 mkdir -p /tmp/sub_u64_cov/bin
 gcc -std=c11 -Wall -Wextra -pedantic -O0 -g --coverage \
-  -Iinclude -Ilibs/bignum-common/include \
+  -Iinclude -Ilibs/bignum-core/include \
   -c src/bignum_sub_u64.c -o /tmp/sub_u64_cov/bignum_sub_u64.o
 # Compile and run tests/test_bignum_sub_u64.c,
 # tests/test_bignum_sub_u64_extra.c and tests/test_bignum_sub_u64_mt.c
@@ -80,20 +80,20 @@ Build the benchmark binaries after building the selected implementation:
 
 ```bash
 cc -std=c11 -O2 -Wall -Wextra -Werror -pedantic \
-  -Iinclude -Ilibs/bignum-common/include \
+  -Iinclude -Ilibs/bignum-core/include \
   -Ilibs/benchmark-framework/dist -Ibenchmarks \
   benchmarks/bench_bignum_sub_u64.c \
   benchmarks/adapter/bignum_sub_u64_benchmark_adapter.c \
-  build/bignum_sub_u64.o libs/bignum-common/build/bignum_common.o \
+  build/bignum_sub_u64.o libs/bignum-core/build/bignum_core.o libs/bignum-init/build/bignum_init.o libs/bignum-init-u64/build/bignum_init_u64.o libs/bignum-init-from-array/build/bignum_init_from_array.o libs/bignum-normalize/build/bignum_normalize.o \
   libs/benchmark-framework/dist/libbenchmark_framework.a \
   -pthread -lm -o bin/bench_bignum_sub_u64_st
 
 cc -std=c11 -O2 -Wall -Wextra -Werror -pedantic -DBENCHMARK_MODE_MT \
-  -Iinclude -Ilibs/bignum-common/include \
+  -Iinclude -Ilibs/bignum-core/include \
   -Ilibs/benchmark-framework/dist -Ibenchmarks \
   benchmarks/bench_bignum_sub_u64_mt.c \
   benchmarks/adapter/bignum_sub_u64_benchmark_adapter.c \
-  build/bignum_sub_u64.o libs/bignum-common/build/bignum_common.o \
+  build/bignum_sub_u64.o libs/bignum-core/build/bignum_core.o libs/bignum-init/build/bignum_init.o libs/bignum-init-u64/build/bignum_init_u64.o libs/bignum-init-from-array/build/bignum_init_from_array.o libs/bignum-normalize/build/bignum_normalize.o \
   libs/benchmark-framework/dist/libbenchmark_framework.a \
   -pthread -lm -o bin/bench_bignum_sub_u64_mt
 ```
@@ -135,7 +135,7 @@ For aggregate `bignum-lib` integration, prefer its generated single header and s
 
 ## Performance recommendations
 
-The YASM implementation already uses fast paths for zero subtrahend and one-word inputs, preserves the borrow flag across the multi-word loop, and skips work after borrow clears. Further gains should be measured rather than assumed. Candidate work includes specialized short-length paths, reducing framework preparation overhead in kernel-only measurements, and upstreaming a `.note.GNU-stack` section for the shared `bignum-common` assembly object.
+The YASM implementation already uses fast paths for zero subtrahend and one-word inputs, preserves the borrow flag across the multi-word loop, and skips work after borrow clears. Further gains should be measured rather than assumed. Candidate work includes specialized short-length paths, reducing framework preparation overhead in kernel-only measurements, and upstreaming a `.note.GNU-stack` section for the shared upstream assembly object.
 
 ## Contributing and release
 

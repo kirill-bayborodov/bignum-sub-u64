@@ -2,7 +2,7 @@
  * @file test_bignum_sub_u64_benchmark_adapter.c
  * @brief Deterministic tests for the bignum-sub-u64 benchmark adapter.
  */
-#include "adapter/bignum_sub_u64_benchmark_adapter.h"
+#include "bignum_sub_u64_benchmark_adapter.h"
 
 #include <stdint.h>
 #include <string.h>

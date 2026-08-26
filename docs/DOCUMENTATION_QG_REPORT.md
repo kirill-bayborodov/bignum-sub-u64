@@ -30,7 +30,7 @@ The review covers the public header, C11 implementation, YASM implementation, de
 
 ## Functional and performance evidence
 
-The C11 suite completed with `0 / 4` failing binaries; deterministic tests report 17/17 passing. AddressSanitizer and UBSan runs completed with zero sanitizer issues. Manual gcov evidence for `src/bignum_sub_u64.c` is 100.00% line coverage (40/40), 100.00% branch coverage (32/32) and 100.00% call coverage (1/1).
+The C11 suite completed with `0 / 5` failing binaries; deterministic tests report 17/17 passing. AddressSanitizer and UBSan runs completed with zero sanitizer issues. Manual gcov evidence for `src/bignum_sub_u64.c` is 100.00% line coverage (39/39), 100.00% branch coverage (36/36) and 100.00% call coverage (1/1).
 
 The independent differential harness compared logical result words, normalized lengths and error statuses for 10,000 deterministic randomized cases. It also compared the complete destination bytes on error paths. The harness reported `10000 differential cases passed`.
 
@@ -38,8 +38,8 @@ The benchmark-framework standard matrix produced 48 samples for each implementat
 
 ## Known warning and recommendation
 
-Linking the legacy `bignum-common` assembly object emits a warning because it lacks a `.note.GNU-stack` section. This is an upstream assembly hygiene issue and is not masked by this module. The recommended follow-up is an upstream patch adding the non-executable-stack note and a CI check for executable-stack regressions.
+Linking the upstream assembly object emits a warning because it lacks a `.note.GNU-stack` section. This is an upstream assembly hygiene issue and is not masked by this module. The recommended follow-up is an upstream patch adding the non-executable-stack note and a CI check for executable-stack regressions.
 
 ## Final decision
 
-The module satisfies the documentation QG for the reviewed artifacts. The benchmark adapter uses the actual installed compatibility header `benchmark_framework.h`; the v1.0.0 framework source documentation identifies the corresponding core API. No undocumented project-owned contract changes remain.
+The module satisfies the documentation QG for the reviewed artifacts. The benchmark adapter uses the actual installed compatibility header `benchmark_framework.h`; the v1.0.0 framework source documentation identifies the corresponding core API. The module now uses `bignum-core` plus separate init/normalize operation modules rather than the legacy foundation module; no undocumented project-owned contract changes remain.

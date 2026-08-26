@@ -6,20 +6,20 @@ Build the two benchmark entry points with the selected implementation:
 
 ```bash
 gcc -std=c11 -O2 -Wall -Wextra -Werror -pedantic \
-  -Iinclude -Ilibs/bignum-common/include \
+  -Iinclude -Ilibs/bignum-core/include \
   -Ilibs/benchmark-framework/dist -Ibenchmarks \
   benchmarks/bench_bignum_sub_u64.c \
   benchmarks/adapter/bignum_sub_u64_benchmark_adapter.c \
-  build/bignum_sub_u64.o libs/bignum-common/build/bignum_common.o \
+  build/bignum_sub_u64.o libs/bignum-core/build/bignum_core.o libs/bignum-init/build/bignum_init.o libs/bignum-init-u64/build/bignum_init_u64.o libs/bignum-init-from-array/build/bignum_init_from_array.o libs/bignum-normalize/build/bignum_normalize.o \
   libs/benchmark-framework/dist/libbenchmark_framework.a \
   -pthread -lm -o bin/bench_bignum_sub_u64_st
 
 gcc -std=c11 -O2 -Wall -Wextra -Werror -pedantic -DBENCHMARK_MODE_MT \
-  -Iinclude -Ilibs/bignum-common/include \
+  -Iinclude -Ilibs/bignum-core/include \
   -Ilibs/benchmark-framework/dist -Ibenchmarks \
   benchmarks/bench_bignum_sub_u64_mt.c \
   benchmarks/adapter/bignum_sub_u64_benchmark_adapter.c \
-  build/bignum_sub_u64.o libs/bignum-common/build/bignum_common.o \
+  build/bignum_sub_u64.o libs/bignum-core/build/bignum_core.o libs/bignum-init/build/bignum_init.o libs/bignum-init-u64/build/bignum_init_u64.o libs/bignum-init-from-array/build/bignum_init_from_array.o libs/bignum-normalize/build/bignum_normalize.o \
   libs/benchmark-framework/dist/libbenchmark_framework.a \
   -pthread -lm -o bin/bench_bignum_sub_u64_mt
 ```

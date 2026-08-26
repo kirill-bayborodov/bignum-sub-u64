@@ -5,7 +5,7 @@
  *          publishes one aggregate machine-readable protocol result.
  */
 #include "benchmark_framework.h"
-#include "adapter/bignum_sub_u64_benchmark_adapter.h"
+#include "bignum_sub_u64_benchmark_adapter.h"
 
 #include <stdlib.h>
 

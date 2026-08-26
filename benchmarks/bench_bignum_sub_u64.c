@@ -5,7 +5,7 @@
  *          dataset copies, protocol output and checksum reduction.
  */
 #include "benchmark_framework.h"
-#include "adapter/bignum_sub_u64_benchmark_adapter.h"
+#include "bignum_sub_u64_benchmark_adapter.h"
 
 #include <stdlib.h>
 
