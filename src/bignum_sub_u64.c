@@ -34,9 +34,6 @@ static inline int check_buffer_overlap(const bignum_t *result, const bignum_t *a
  *          handles zero-subtrahend copy, zero input, one-word subtraction, or
  *          multi-word borrow propagation. The destination is written only on a
  *          successful path; leading zero words are removed from result->len.
- * @param[out] result Caller-allocated destination; exact aliasing with a is allowed.
- * @param[in] a Caller-owned immutable input with a valid length bound.
- * @param[in] b Unsigned 64-bit subtrahend.
  * @return Named bignum_sub_u64_status_t; all errors preserve result unchanged.
  */
 bignum_sub_u64_status_t bignum_sub_u64(bignum_t *result, const bignum_t *a, uint64_t b)
